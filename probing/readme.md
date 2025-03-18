@@ -1,23 +1,15 @@
 ### Installation
 
-important to install in /usr/local/bin to make terminal see the executables from any folder<br>
+<mark>important</mark> to install in /usr/local/bin to make terminal see the executables from any folder<br>
 [ecc_ecli_installation](https://github.com/eunomia-bpf/eunomia-bpf?tab=readme-ov-file#install-the-project)
 
+### Important
+not every folder has working code
+however getaddrinfo definetely works
 
-
-### Info
-1. I created c file ip_getter.c which uses getaddrinfo for testing how my uprobe works
-2. this file is compiled into ./test
-3. ebpf_ip_getter.c is used for uprobbing getaddrinfo.
-4. ebpf_udp_sendmsg.c just has kprobe for udp_sendmsg and sendto.
-5. I did this to see whether firefox browther uses upd_sendmsg and later decided to probe sendto
 
 ### compilation and attachment
-for ebpf_udp_sendmsg.c<br>
-sh ./compile.sh
-
-for ebpf_ip_getter.c<br>
-sh ./compile_getaddrinfo.c<br>
+use make in any folder
 
 ### tracing
 sh ./show_trace.sh
