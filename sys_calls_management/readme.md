@@ -1,7 +1,8 @@
 ### Installation
 [ecc_ecli_installation](https://github.com/eunomia-bpf/eunomia-bpf?tab=readme-ov-file#install-the-project)<br>
-<code>
 here are commands from the link above:
+
+<code>
 wget https://aka.pw/bpf-ecli -O ecli && chmod +x ./ecli<br>
 sudo ./ecli run https://eunomia-bpf.github.io/eunomia-bpf/sigsnoop/package.json<br>
 wget https://github.com/eunomia-bpf/eunomia-bpf/releases/latest/download/ecc && chmod +x ./ecc<br>
