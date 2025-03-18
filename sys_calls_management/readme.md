@@ -2,10 +2,7 @@
 
 [ecc_ecli_installation](https://github.com/eunomia-bpf/eunomia-bpf?tab=readme-ov-file#install-the-project)<br>
 
-after installation from the link you need to link your file to make ecc and ecli visible to any directory using this command<br>
-<code>
-sudo ln -s
-</code>
+important to install in /usr/local/bin to make terminal see the executables from any folder
 
 
 ### Info
