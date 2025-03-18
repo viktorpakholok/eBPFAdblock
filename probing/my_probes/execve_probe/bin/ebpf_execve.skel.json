@@ -1,0 +1,1 @@
+{"bpf_skel":{"data_sections":[],"maps":[{"ident":"rodata","name":"ebpf_exe.rodata"}],"obj_name":"ebpf_execve_bpf","progs":[{"attach":"kprobe/__x64_sys_execve","link":true,"name":"execve"}]},"eunomia_version":"0.3.4"}
