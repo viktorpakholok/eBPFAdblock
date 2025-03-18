@@ -1,3 +1,7 @@
+### Installation
+href(asdf)[https://github.com/eunomia-bpf/eunomia-bpf?tab=readme-ov-file#install-the-project]
+
+
 ### Info
 1. I created c file ip_getter.c which uses getaddrinfo for testing how my uprobe works
 2. this file is compiled into ./test
