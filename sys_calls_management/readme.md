@@ -1,6 +1,6 @@
 ### Installation
 
-important to install in /usr/local/bin to make terminal see the executables from any folder
+important to install in /usr/local/bin to make terminal see the executables from any folder<br>
 [ecc_ecli_installation](https://github.com/eunomia-bpf/eunomia-bpf?tab=readme-ov-file#install-the-project)
 
 
