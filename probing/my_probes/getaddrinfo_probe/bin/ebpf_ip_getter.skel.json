@@ -1,0 +1,1 @@
+{"bpf_skel":{"data_sections":[],"maps":[{"ident":"rodata","name":"ebpf_ip_.rodata"}],"obj_name":"ebpf_ip_getter_bpf","progs":[{"attach":"uprobe//usr/lib/x86_64-linux-gnu/libc.so.6:getaddrinfo","link":true,"name":"getaddrinfo"}]},"eunomia_version":"0.3.4"}
