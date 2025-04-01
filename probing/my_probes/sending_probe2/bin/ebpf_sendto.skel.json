@@ -1,1 +1,0 @@
-{"bpf_skel":{"data_sections":[],"maps":[{"ident":"rodata","name":"ebpf_sen.rodata"}],"obj_name":"ebpf_sendto_bpf","progs":[{"attach":"kprobe/__x64_sys_sendto","link":true,"name":"sendto"}]},"eunomia_version":"0.3.4"}
