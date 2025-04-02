@@ -1,5 +1,3 @@
-# ID = 
-# NI =
 XDP_PROG_NAME=XDP_block.bpf.c
 XDP_OBJ_NAME=XDP_block.bpf.o
 MANAGE_PROG_NAME=manage.c
@@ -25,7 +23,6 @@ endif
 all: compile move load pin
 
 compile:
-	set -x
 	mkdir -p ${OBJ_DIR}
 	mkdir -p ${BIN_DIR}
 	clang -O2 -target bpf -g -I ${LINUX_LIB} -I /usr/include/bpf -c ${XDP_PROG_NAME} -o ${XDP_OBJ_NAME}
@@ -34,7 +31,7 @@ compile:
 move: ${XDP_OBJ_NAME}
 	mv ${XDP_OBJ_NAME} ${OBJ_DIR}/${XDP_OBJ_NAME}
 
-.PHONY: load pin info attach check detach clean
+.PHONY: load pin info check detach clean
 
 load: ${OBJ_DIR}/${XDP_OBJ_NAME}
 	sudo ip link set $$(ip link | grep "^2" | sed -n 's/^2: \([^:]*\):.*/\1/p') xdp obj ${OBJ_DIR}/${XDP_OBJ_NAME} sec xdp
@@ -42,12 +39,11 @@ load: ${OBJ_DIR}/${XDP_OBJ_NAME}
 pin:
 	sudo bpftool map pin id $$(sudo bpftool map show | grep "ip_map" | cut -d':' -f1) /sys/fs/bpf/xdp/map
 
+
 info:
 	sudo bpftool prog list
 	ip link
 
-	# sudo bpftool prog list | grep "xdp" | cut -c 1-2
-	# ip link | grep "^2" | sed -n 's/^2: \([^:]*\):.*/\1/p'
 
 check:
 	sudo cat /sys/kernel/debug/tracing/trace_pipe
