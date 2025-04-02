@@ -32,15 +32,11 @@ int xdp_check(struct xdp_md *ctx) {
         return XDP_ABORTED;
     }
 
-    if (iph->protocol != IPPROTO_TCP) {
-        bpf_printk("Here1 %x, %d", iph->saddr, iph->saddr);
+    bpf_printk("Here1 %x, %d", iph->saddr, iph->saddr);
 
-        __u32 *blockIP = bpf_map_lookup_elem(&ip_map, &iph->saddr);
-        if (blockIP) {
-            return XDP_ABORTED;
-        }
-
-        return XDP_PASS;
+    __u32 *blockIP = bpf_map_lookup_elem(&ip_map, &iph->saddr);
+    if (blockIP) {
+        return XDP_ABORTED;
     }
     bpf_printk("Here %x", iph->saddr);
     return XDP_PASS;
