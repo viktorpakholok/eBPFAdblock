@@ -13,7 +13,7 @@ char LICENSE[] SEC("license") = "Dual BSD/GPL";
 SEC("uprobe//usr/lib/x86_64-linux-gnu/libc.so.6:getaddrinfo")
 int BPF_UPROBE(getaddrinfo, const char *node, const char *service,
                               const struct addrinfo *hints, struct addrinfo **res) {
-    bpf_printk("UPROBE ENTRY, node_len: %d, service_len: %d", sizeof(node), sizeof(service));
+    bpf_printk("UPROBE(getaddrinfo)");
     
 
     if (hints) {
