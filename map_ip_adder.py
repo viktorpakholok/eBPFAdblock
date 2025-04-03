@@ -10,17 +10,15 @@ def manage_ip(ip_address, prog_type):
     args = ["sudo", PROG_FILE, prog_type, ip_address]
     if (prog_type == "add") :
         args.append("1")
-    print(args)
-    return subprocess.run(args, capture_output=True, text=True).stdout.rstrip().split("\n")
+    return subprocess.run(args, capture_output=True, text=True).stdout.rstrip()
 
 
 if __name__ == "__main__":
     IP_FILE = argv[1]
     PROG_TYPE = argv[2]
-    print(argv)
     with open(IP_FILE, "r", encoding="utf-8") as ip_file:
         for line in ip_file.readlines():
             ip_address = line.strip()
 
-            print(f"'{ip_address}'")
+            print(f"ip: '{ip_address}'")
             print(manage_ip(ip_address, PROG_TYPE))
