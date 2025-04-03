@@ -24,3 +24,24 @@ Testing:<br>
 
 ### Detachment of XDP program<br>
 `make clean`
+
+### General workflow
+
+![WorkflowImage!](assets/workflow.png)
+
+
+
+### Overview
+
+This project is about traffic filtering at the kernel level using **BPF** and **XDP**. By blocking unwanted traffic before it reaches user space we enhance performance and make experience of using websites free from distractions.
+
+### Implementation Details
+
+- **Blocked IP addresses** are added to a BPF map using a python or C script .
+- **Blocked domains** are stored in a _separate_ BPF map.
+- When a DNS query is made the resolved IP address is added to the IP address map to others.
+- **Filtering Mechanism**: the XDP program checks incoming packets against the blocked IP map:
+    - If the IP address is in the map the packet is dropped.
+    - Else the packet is allowed to pass through.
+
+ 
