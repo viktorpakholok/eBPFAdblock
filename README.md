@@ -13,7 +13,7 @@ Deleting ip addresses which should be blocked:<br>
 `sudo bin/manage delete <ip-address>`
 
 Adding/deleting ip addresses from file. ip addresses should be separated by '\n':<br>
-`sudo python3 map_ip_adder.py ip_file.txt <add | delete>`
+`sudo python3 map_ip_adder.py <file_path> <add | delete>`
 
 Showing ip addresses from the map:<br>
 `sudo bin/manage show`
