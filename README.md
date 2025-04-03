@@ -1,5 +1,12 @@
 # eBPFAdblock
 
+### Overview
+
+This project is about traffic filtering at the kernel level using **BPF** and **XDP**. By blocking unwanted traffic before it reaches user space we enhance performance and make experience of using websites free from distractions.
+
+### eBPF introduction
+
+eBPF stands for extended Backerly Packet Filter, however, nowadays because of the significant development of its functionality this name is more symbolic. Using eBPF one can safely and with minimal overhead change the behaviour of Linux kernel at the runtime. To find out for more about Linux, its kernel, networking and packet filtering our team selected **Analysis/modification of network packets using eBPF** as topic of our project and decided to do Adblock based on this technology.
 
 ### Compilation and attachment of XDP program
 `make`
@@ -21,19 +28,12 @@ Showing ip addresses from the map:<br>
 Testing:<br>
 `ping <blocked-ip-address>`
 
-
 ### Detachment of XDP program<br>
 `make clean`
 
 ### General workflow
 
 ![WorkflowImage!](assets/workflow.png)
-
-
-
-### Overview
-
-This project is about traffic filtering at the kernel level using **BPF** and **XDP**. By blocking unwanted traffic before it reaches user space we enhance performance and make experience of using websites free from distractions.
 
 ### Implementation Details
 
