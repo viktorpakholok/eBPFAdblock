@@ -6,8 +6,11 @@
 
 
 ### Usage
-Adding/deleting ip addresses which should be blocked:<br>
-`sudo bin/manage <add/delete> <ip-address> 1`
+Adding ip addresses which should be blocked:<br>
+`sudo bin/manage add <ip-address> 1`
+
+Deleting ip addresses which should be blocked:<br>
+`sudo bin/manage delete <ip-address>`
 
 Adding/deleting ip addresses from file. ip addresses should be separated by '\n':<br>
 `sudo python3 map_ip_adder.py ip_file.txt <add or delete>`
