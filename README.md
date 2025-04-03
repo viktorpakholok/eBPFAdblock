@@ -15,7 +15,7 @@ Adding/deleting ip addresses from file. ip addresses should be separated by '\n'
 Showing ip addresses from the map:<br>
 `sudo bin/manage show`
 
-Testing:
+Testing:<br>
 `ping <blocked-ip-address>`
 
 
