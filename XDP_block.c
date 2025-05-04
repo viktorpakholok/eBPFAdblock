@@ -5,12 +5,34 @@
 #include <bpf/bpf_endian.h>
 #include <bpf/bpf_helpers.h>
 
-struct {
+
+#define MAX_DOMAIN_NAME_LEN 254
+
+struct 
+{
     __uint(type, BPF_MAP_TYPE_HASH);
-    __type(key, __u32);   // IPv4 address
-    __type(value, __u64);
+    __type(key, __u32);
+    __type(value, __u8);
     __uint(max_entries, 1024);
+    __uint(pinning, LIBBPF_PIN_BY_NAME);
 } ip_map SEC(".maps");
+
+
+struct domain_name
+{
+    char name[MAX_DOMAIN_NAME_LEN];
+};
+
+struct
+{
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __type(key, struct domain_name);
+    __type(value, __u8);
+    __uint(max_entries, 1024);
+    __uint(pinning, LIBBPF_PIN_BY_NAME);
+} domain_map SEC(".maps");
+
+
 
 
 SEC("xdp")
@@ -34,7 +56,7 @@ int xdp_check(struct xdp_md *ctx) {
 
     bpf_printk("Here1 %x, %d", iph->saddr, iph->saddr);
 
-    __u32 *blockIP = bpf_map_lookup_elem(&ip_map, &iph->saddr);
+    __u8 *blockIP = bpf_map_lookup_elem(&ip_map, &iph->saddr);
     if (blockIP) {
         return XDP_ABORTED;
     }
