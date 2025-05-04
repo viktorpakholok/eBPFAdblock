@@ -1,9 +1,8 @@
-XDP_PROG_NAME=XDP_block.bpf.c
-XDP_OBJ_NAME=XDP_block.bpf.o
+XDP_PROG_NAME=XDP_block.c
+XDP_OBJ_NAME=XDP_block.o
 MANAGE_PROG_NAME=manage.c
 MANAGE_EXE_NAME=manage
 # BPF_PROG_NAME=XDP_block
-MAP_NAME=ip_map
 BIN_DIR=./bin
 OBJ_DIR=./obj
 
@@ -37,8 +36,8 @@ load: ${OBJ_DIR}/${XDP_OBJ_NAME}
 	sudo ip link set $$(ip link | grep "^2" | sed -n 's/^2: \([^:]*\):.*/\1/p') xdp obj ${OBJ_DIR}/${XDP_OBJ_NAME} sec xdp
 
 pin:
-	sudo bpftool map pin id $$(sudo bpftool map show | grep "ip_map" | cut -d':' -f1) /sys/fs/bpf/xdp/map
-
+	sudo bpftool map pin id $$(sudo bpftool map show | grep "ip_map" | cut -d':' -f1) /sys/fs/bpf/xdp/ip_map
+	sudo bpftool map pin id $$(sudo bpftool map show | grep "domain_map" | cut -d':' -f1) /sys/fs/bpf/xdp/domain_map
 
 info:
 	sudo bpftool prog list
@@ -52,6 +51,7 @@ detach:
 	rm -rf ${OBJ_DIR}
 	rm -rf ${BIN_DIR}
 	sudo bpftool net detach xdp dev $$(ip link | grep "^2" | sed -n 's/^2: \([^:]*\):.*/\1/p')
-	sudo rm /sys/fs/bpf/xdp/map
+	sudo rm /sys/fs/bpf/xdp/ip_map
+	sudo rm /sys/fs/bpf/xdp/domain_map
 
 clean: detach
