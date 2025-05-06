@@ -68,6 +68,13 @@ def add_cache_entry(cache, name):
   leaf.p = (c_ubyte * 4).from_buffer(bytearray(4))
   cache[key] = leaf
 
+def start_ip_blocker():
+    print("\nstarted ip blocker")
+    subprocess.run(["make"], capture_output=True)
+
+def stop_ip_blocker():
+    print("\nstopped ip blocker")
+    subprocess.run(["make", "clean"], capture_output=True)
 
 parser = argparse.ArgumentParser(usage='For detailed information about usage,\
  try with -h option')
@@ -100,6 +107,8 @@ for e in domains:
   print(">>>> Adding map entry: ", e)
   add_cache_entry(cache, e)
 
+start_ip_blocker()
+
 print("\nTry to lookup some domain names using nslookup from another terminal.")
 print("For example:  nslookup foo.bar")
 print("\nBPF program will filter-in DNS packets which match with map entries.")
@@ -109,6 +118,7 @@ print("\nHit Ctrl+C to end...")
 socket_fd = function_dns_matching.sock
 fl = fcntl.fcntl(socket_fd, fcntl.F_GETFL)
 fcntl.fcntl(socket_fd, fcntl.F_SETFL, fl & (~os.O_NONBLOCK))
+
 
 last_domains = {"": time()}
 iter = 0 
@@ -122,7 +132,8 @@ while 1:
   try:
     packet_str = os.read(socket_fd, 2048)
   except KeyboardInterrupt:
-    unblock_ips(blocked_ips)
+    # unblock_ips(blocked_ips)
+    stop_ip_blocker()
     sys.exit(0)
   processing_time_started = time()
   last_domains_copy = {domain: domain_time for domain, domain_time in last_domains.items()}
