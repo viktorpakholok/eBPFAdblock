@@ -10,7 +10,9 @@ eBPF stands for extended Backerly Packet Filter, however, nowadays because of th
 
 
 ### Instalation
-`make install`
+```sh
+make install
+```
 
 ### Compilation and attachment of XDP program
 ```sh
