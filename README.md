@@ -14,9 +14,8 @@ eBPF stands for extended Backerly Packet Filter, however, nowadays because of th
 make install
 ```
 
-### Compilation and attachment of XDP program
+### Usage
 ```sh
-make
 sudo python3 dns_matching.py -d "domains_file.txt"
 ```
 
@@ -25,9 +24,6 @@ sudo python3 dns_matching.py -d "domains_file.txt"
 nslookup "<blocked domain>"
 ping "<ip of blocked domain>"
 ```
-
-### Detachment of XDP program<br>
-`make clean`
 
 
 ### General workflow
