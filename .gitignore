@@ -5,3 +5,4 @@ obj/
 *.a
 *.exe
 .DS_Store
+.idea/
