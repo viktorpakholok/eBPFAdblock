@@ -131,66 +131,56 @@ try:
   blocked_ips = set()
   total_processing_time = 0
 
-  with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-    futures = []
 
-    while 1:
-      for i in range(len(futures) - 1, -1, -1):
-        future = futures[i]
-        if not future.done():
-          break
-        result = future.result()
-        futures.pop()
-        # print(result)
+  while 1:
+    iter += 1
+    print("processed packets:", iter)
+    #retrieve raw packet from socket
+    packet_str = os.read(socket_fd, 2048)
+    processing_time_started = time()
+    packet_bytearray = bytearray(packet_str)
 
-      iter += 1
-      print("processed packets:", iter)
-      #retrieve raw packet from socket
-      packet_str = os.read(socket_fd, 2048)
-      processing_time_started = time()
-      packet_bytearray = bytearray(packet_str)
+    ETH_HLEN = 14
+    UDP_HLEN = 8
 
-      ETH_HLEN = 14
-      UDP_HLEN = 8
+    #IP HEADER
+    #calculate ip header length
+    ip_header_length = packet_bytearray[ETH_HLEN]               #load Byte
+    ip_header_length = ip_header_length & 0x0F                  #mask bits 0..3
+    ip_header_length = ip_header_length << 2                    #shift to obtain length
 
-      #IP HEADER
-      #calculate ip header length
-      ip_header_length = packet_bytearray[ETH_HLEN]               #load Byte
-      ip_header_length = ip_header_length & 0x0F                  #mask bits 0..3
-      ip_header_length = ip_header_length << 2                    #shift to obtain length
+    #calculate payload offset
+    payload_offset = ETH_HLEN + ip_header_length + UDP_HLEN
 
-      #calculate payload offset
-      payload_offset = ETH_HLEN + ip_header_length + UDP_HLEN
+    payload = packet_bytearray[payload_offset:]
+    dnsrec = dnslib.DNSRecord.parse(payload)
 
-      payload = packet_bytearray[payload_offset:]
-      dnsrec = dnslib.DNSRecord.parse(payload)
+    print("DNS Answer Section:")
+    has_ipv4 = False
+    dns_answers = dnsrec.rr
+    for dns_answer in dns_answers:
+      print("answer:", dns_answer)
 
-      print("DNS Answer Section:")
-      has_ipv4 = False
-      dns_answers = dnsrec.rr
-      for dns_answer in dns_answers:
-        print("answer:", dns_answer)
-
-        if dns_answer.rtype != 1:
-          continue
-        has_ipv4 = True
-        domain = str(dns_answer.rname).strip(".")
-        domain_ip = str(dns_answer.rdata)
-        print(domain, dns_answer.rtype, domain_ip)
-        if domain_ip not in blocked_ips:
-          blocked_ips.add(domain_ip)
-          futures.append(executor.submit(block_ip, domain_ip))
-      print()
-      processing_time = time() - processing_time_started
-      total_processing_time += processing_time
-      print(f"{processing_time = }")
-      print(f"{total_processing_time = }")
-      print(datetime.now())
-      print("\n")
-      if not has_ipv4:
+      if dns_answer.rtype != 1:
         continue
+      has_ipv4 = True
+      domain = str(dns_answer.rname).strip(".")
+      domain_ip = str(dns_answer.rdata)
+      print(domain, dns_answer.rtype, domain_ip)
+      if domain_ip not in blocked_ips:
+        blocked_ips.add(domain_ip)
+        block_ip(domain_ip)
+    print()
+    processing_time = time() - processing_time_started
+    total_processing_time += processing_time
+    print(f"{processing_time = }")
+    print(f"{total_processing_time = }")
+    print(datetime.now())
+    print("\n")
+    if not has_ipv4:
+      continue
 
-      print(f"{blocked_ips = }")
+    print(f"{blocked_ips = }")
 
 except BaseException as e:
   stop_ip_blocker()

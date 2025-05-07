@@ -68,14 +68,14 @@ int dns_matching(struct __sk_buff *skb)
 
       // Check for Port 53, DNS packet.
       struct udp_t *udp = cursor_advance(cursor, sizeof(*udp));
-      if(udp->dport == 53){
+      if(udp->sport == 53){
 
         struct dns_hdr_t *dns_hdr = cursor_advance(cursor, sizeof(*dns_hdr));
 
         // Do nothing if packet is not a request.
-        if((dns_hdr->flags >>15) != 0) {
+        if((dns_hdr->flags >>15) == 0) {
           // Exit if this packet is not a request.
-          return -1;
+          return 0;
         }
 
         u16 i = 0;
