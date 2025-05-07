@@ -13,6 +13,9 @@ import dnslib
 import argparse
 import dns.resolver
 from time import time
+import concurrent.futures
+import asyncio
+from datetime import datetime
 
 def get_ipv4(domain):
     return [r.address for r in dns.resolver.resolve(domain, "A")]
@@ -30,9 +33,10 @@ def manage_ip(ip_address, prog_type):
   return subprocess.run(args, capture_output=True, text=True).stdout.rstrip()
 
 def block_ip(ip):
-  print("blocking", ip)
+  # print("blocking", ip)
   res = manage_ip(ip, "add")
   print(res)
+  return res
 
 def unblock_ip(ip):
   print("unblocking", ip)
@@ -76,112 +80,120 @@ def stop_ip_blocker():
     print("\nstopped ip blocker")
     subprocess.run(["make", "clean"], capture_output=True)
 
-parser = argparse.ArgumentParser(usage='For detailed information about usage,\
- try with -h option')
-req_args = parser.add_argument_group("Required arguments")
-req_args.add_argument("-d", "--domains_path", type=str, required=True,
-    help='A file with listed domains separated by new line')
-args = parser.parse_args()
 
-# initialize BPF - load source code from http-parse-simple.c
-bpf = BPF(src_file = "dns_matching.c", debug=0)
-# print(bpf.dump_func("dns_test"))
+try:
+  parser = argparse.ArgumentParser(usage='For detailed information about usage,\
+   try with -h option')
+  req_args = parser.add_argument_group("Required arguments")
+  req_args.add_argument("-d", "--domains_path", type=str, required=True,
+      help='A file with listed domains separated by new line')
+  args = parser.parse_args()
 
-#load eBPF program http_filter of type SOCKET_FILTER into the kernel eBPF vm
-#more info about eBPF program types
-#http://man7.org/linux/man-pages/man2/bpf.2.html
-function_dns_matching = bpf.load_func("dns_matching", BPF.SOCKET_FILTER)
+  # initialize BPF - load source code from http-parse-simple.c
+  # TODO ask about redefinition
+  bpf = BPF(src_file = "dns_matching.c", debug=0, cflags=["-Wno-macro-redefined"])
+  # print(bpf.dump_func("dns_test"))
 
-
-#create raw socket, bind it to user provided interface
-#attach bpf program to socket created
-BPF.attach_raw_socket(function_dns_matching, "")
-
-# Get the table.
-cache = bpf.get_table("cache")
-
-print(args.domains_path)
-domains = get_domains(args.domains_path)
-# Add cache entries
-for e in domains:
-  print(">>>> Adding map entry: ", e)
-  add_cache_entry(cache, e)
-
-start_ip_blocker()
-
-print("\nTry to lookup some domain names using nslookup from another terminal.")
-print("For example:  nslookup foo.bar")
-print("\nBPF program will filter-in DNS packets which match with map entries.")
-print("Packets received by user space program will be printed here")
-print("\nHit Ctrl+C to end...")
-
-socket_fd = function_dns_matching.sock
-fl = fcntl.fcntl(socket_fd, fcntl.F_GETFL)
-fcntl.fcntl(socket_fd, fcntl.F_SETFL, fl & (~os.O_NONBLOCK))
+  #load eBPF program http_filter of type SOCKET_FILTER into the kernel eBPF vm
+  #more info about eBPF program types
+  #http://man7.org/linux/man-pages/man2/bpf.2.html
+  function_dns_matching = bpf.load_func("dns_matching", BPF.SOCKET_FILTER)
 
 
-last_domains = {"": time()}
-iter = 0 
-blocked_ips = set()
-total_processing_time = 0
+  #create raw socket, bind it to user provided interface
+  #attach bpf program to socket created
+  BPF.attach_raw_socket(function_dns_matching, "")
 
-while 1:
-  iter += 1 
-  print("processed packets:", iter)
-  #retrieve raw packet from socket
-  try:
-    packet_str = os.read(socket_fd, 2048)
-  except KeyboardInterrupt:
-    # unblock_ips(blocked_ips)
-    stop_ip_blocker()
-    sys.exit(0)
-  processing_time_started = time()
-  last_domains_copy = {domain: domain_time for domain, domain_time in last_domains.items()}
-  for domain, domain_time in last_domains.items():
-    if time() - domain_time > 0.5:
-      del last_domains_copy[domain]
-  last_domains = last_domains_copy
-  packet_bytearray = bytearray(packet_str)
+  # Get the table.
+  cache = bpf.get_table("cache")
 
-  ETH_HLEN = 14
-  UDP_HLEN = 8
+  print(args.domains_path)
+  domains = get_domains(args.domains_path)
+  # Add cache entries
+  for e in domains:
+    print(">>>> Adding map entry: ", e)
+    add_cache_entry(cache, e)
 
-  #IP HEADER
-  #calculate ip header length
-  ip_header_length = packet_bytearray[ETH_HLEN]               #load Byte
-  ip_header_length = ip_header_length & 0x0F                  #mask bits 0..3
-  ip_header_length = ip_header_length << 2                    #shift to obtain length
+  start_ip_blocker()
 
-  #calculate payload offset
-  payload_offset = ETH_HLEN + ip_header_length + UDP_HLEN
+  print("\nTry to lookup some domain names using nslookup from another terminal.")
+  print("For example:  nslookup foo.bar")
+  print("\nBPF program will filter-in DNS packets which match with map entries.")
+  print("Packets received by user space program will be printed here")
+  print("\nHit Ctrl+C to end...")
 
-  payload = packet_bytearray[payload_offset:]
-  dnsrec = dnslib.DNSRecord.parse(payload)
+  socket_fd = function_dns_matching.sock
+  fl = fcntl.fcntl(socket_fd, fcntl.F_GETFL)
+  fcntl.fcntl(socket_fd, fcntl.F_SETFL, fl & (~os.O_NONBLOCK))
 
-  print("rec", dnsrec)
-  print("last domains", last_domains)
-  print(f"{blocked_ips = }")
-  
-  for q in dnsrec.questions:
-    if q.qtype != 1:
-      continue
-  
-    domain = str(q.qname).strip(".")
-    if domain in last_domains:
-      print("skipped", last_domains)
-      #last_domains.remove(domain)
-      continue
-    last_domains[domain] = time()
 
-    domain_ips = get_ipv4(domain)
-    # print()
-    for domain_ip in domain_ips:
-      if domain_ip not in blocked_ips:
-        blocked_ips.add(domain_ip)
-        block_ip(domain_ip)
-  processing_time = time() - processing_time_started
-  total_processing_time += processing_time
-  print(f"{processing_time = }")
-  print(f"{total_processing_time = }")
-  print()
-      
+  iter = 0
+  blocked_ips = set()
+  total_processing_time = 0
+
+  with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+    futures = []
+
+    while 1:
+      for i in range(len(futures) - 1, -1, -1):
+        future = futures[i]
+        if not future.done():
+          break
+        result = future.result()
+        futures.pop()
+        # print(result)
+
+      iter += 1
+      print("processed packets:", iter)
+      #retrieve raw packet from socket
+      packet_str = os.read(socket_fd, 2048)
+      processing_time_started = time()
+      packet_bytearray = bytearray(packet_str)
+
+      ETH_HLEN = 14
+      UDP_HLEN = 8
+
+      #IP HEADER
+      #calculate ip header length
+      ip_header_length = packet_bytearray[ETH_HLEN]               #load Byte
+      ip_header_length = ip_header_length & 0x0F                  #mask bits 0..3
+      ip_header_length = ip_header_length << 2                    #shift to obtain length
+
+      #calculate payload offset
+      payload_offset = ETH_HLEN + ip_header_length + UDP_HLEN
+
+      payload = packet_bytearray[payload_offset:]
+      dnsrec = dnslib.DNSRecord.parse(payload)
+
+      print("DNS Answer Section:")
+      has_ipv4 = False
+      dns_answers = dnsrec.rr
+      for dns_answer in dns_answers:
+        print("answer:", dns_answer)
+
+        if dns_answer.rtype != 1:
+          continue
+        has_ipv4 = True
+        domain = str(dns_answer.rname).strip(".")
+        domain_ip = str(dns_answer.rdata)
+        print(domain, dns_answer.rtype, domain_ip)
+        if domain_ip not in blocked_ips:
+          blocked_ips.add(domain_ip)
+          futures.append(executor.submit(block_ip, domain_ip))
+      print()
+      processing_time = time() - processing_time_started
+      total_processing_time += processing_time
+      print(f"{processing_time = }")
+      print(f"{total_processing_time = }")
+      print(datetime.now())
+      print("\n")
+      if not has_ipv4:
+        continue
+
+      print(f"{blocked_ips = }")
+
+except BaseException as e:
+  stop_ip_blocker()
+  if not isinstance(e, KeyboardInterrupt):
+    raise e
+
