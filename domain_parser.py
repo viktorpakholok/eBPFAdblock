@@ -1,0 +1,58 @@
+import re
+import requests
+
+OWNER = "AdguardTeam"
+REPO = "HostlistsRegistry"
+ASSETS_DIR = "assets"
+TOKEN = None
+
+
+session = requests.Session()
+
+if TOKEN:
+    session.headers.update({"Authorization": f"token {TOKEN}"})
+
+
+def list_filter_files(owner, repo, path):
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
+    resp = session.get(url)
+    resp.raise_for_status()
+    return [item for item in resp.json()
+            if item["type"] == "file"
+            and item["name"].startswith("filter_")
+            and item["name"].endswith(".txt")]
+
+def download_file(url):
+    r = session.get(url)
+    r.raise_for_status()
+    return r.text
+
+def collect_domains():
+    domain_re1 = re.compile(r'^\|\|([^/\^]+)\^')
+    domain_re2 = re.compile(r'^0\.0\.0\.0\s+([^\s#]+)')
+
+    domains = set()
+
+    files = list_filter_files(OWNER, REPO, ASSETS_DIR)
+
+    for f in files:
+        text = download_file(f["download_url"])
+        for line in text.splitlines():
+            m1 = domain_re1.match(line)
+            if m1:
+                domains.add(m1.group(1))
+                continue
+            m2 = domain_re2.match(line)
+            if m2:
+                domains.add(m2.group(1))
+
+    out_path = "all_domains.txt"
+    with open(out_path, "w", encoding="utf-8") as out:
+        for d in domains:
+            out.write(d + "\n")
+
+    print(f"\nCollected {len(domains)} unique maliciuous domains. Saved in: {out_path}")
+
+
+if __name__ == "__main__":
+    collect_domains()
