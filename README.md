@@ -44,4 +44,10 @@ Testing:<br>
     - If the IP address is in the map the packet is dropped.
     - Else the packet is allowed to pass through.
 
+### References
+AdGuard adblocker: https://github.com/AdguardTeam/HostlistsRegistry
+- we used this repository for collecting a list of malicious domain names
+
+
+
  
