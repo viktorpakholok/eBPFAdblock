@@ -1,5 +1,6 @@
 import re
 import requests
+import sys
 
 OWNER = "AdguardTeam"
 REPO = "HostlistsRegistry"
@@ -35,7 +36,8 @@ def collect_domains():
 
     files = list_filter_files(OWNER, REPO, ASSETS_DIR)
 
-    for f in files:
+    for idx, f in enumerate(files):
+        print(f"Processing {idx}/{len(files)-1}", end='\r', flush=True)
         text = download_file(f["download_url"])
         for line in text.splitlines():
             m1 = domain_re1.match(line)
@@ -51,7 +53,7 @@ def collect_domains():
         for d in domains:
             out.write(d + "\n")
 
-    print(f"\nCollected {len(domains)} unique maliciuous domains. Saved in: {out_path}")
+    print(f"\nCollected {len(domains)} unique maliciuous domains.\nSaved in: {out_path}")
 
 
 if __name__ == "__main__":
