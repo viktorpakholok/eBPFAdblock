@@ -16,6 +16,10 @@ make install
 
 ### Usage
 ```sh
+sh ./run_adblock.sh
+```
+or
+```sh
 sudo python3 dns_matching.py -d "domains_file.txt"
 ```
 
