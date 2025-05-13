@@ -50,7 +50,6 @@ def collect_domains():
     domains = set()
 
     files = list_filter_files(OWNER, REPO, ASSETS_DIR)
-    lines_counter = 0
 
     for idx, f in enumerate(files):
         print(f"Processing {idx}/{len(files)-1}", end="\r", flush=True)
@@ -59,14 +58,12 @@ def collect_domains():
             m1 = domain_re1.match(line)
             if m1:
                 domains.add(m1.group(1))
-                lines_counter += 1
                 continue
             m2 = domain_re2.match(line)
             if m2:
                 domains.add(m2.group(1))
-                lines_counter += 1
 
-            if lines_counter >= MAX_LINES:
+            if len(domains) >= MAX_LINES:
                 break
 
     out_path = "all_domains.txt"
