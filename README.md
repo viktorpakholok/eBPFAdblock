@@ -44,6 +44,9 @@ ping "<ip of blocked domain>"
 
 we used this repository for collecting a list of malicious domain names
 
+- Testing Adblock: https://canyoublockit.com/results/
+
+
 
 
  
