@@ -20,7 +20,7 @@ int xdp_check(struct xdp_md *ctx) {
 
     struct ethhdr *eth = data;
     if (data + sizeof(struct ethhdr) > data_end) {
-        return XDP_ABORTED;
+        return XDP_PASS;
     }
         
     if (bpf_ntohs(eth->h_proto) != ETH_P_IP) {
@@ -29,16 +29,17 @@ int xdp_check(struct xdp_md *ctx) {
 
     struct iphdr *iph = data + sizeof(struct ethhdr);
     if (data + sizeof(struct ethhdr) + sizeof(struct iphdr) > data_end) {
-        return XDP_ABORTED;
+        return XDP_PASS;
     }
 
-    bpf_printk("Here1 %x, %d", iph->saddr, iph->saddr);
+    // bpf_printk("Here1 %x, %d", iph->saddr, iph->saddr);
 
     __u32 *blockIP = bpf_map_lookup_elem(&ip_map, &iph->saddr);
     if (blockIP) {
+        bpf_printk("Blocked %x", iph->saddr);
         return XDP_ABORTED;
     }
-    bpf_printk("Here %x", iph->saddr);
+    // bpf_printk("Here %x", iph->saddr);
     return XDP_PASS;
 }
 
