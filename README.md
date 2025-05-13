@@ -41,6 +41,7 @@ ping "<ip of blocked domain>"
 
 ### References
 - AdGuard adblocker: https://github.com/AdguardTeam/HostlistsRegistry
+- dns matching: https://github.com/iovisor/bcc/tree/master/examples/networking/dns_matching
 
 we used this repository for collecting a list of malicious domain names
 
