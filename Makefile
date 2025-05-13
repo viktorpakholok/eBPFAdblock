@@ -22,6 +22,11 @@ endif
 
 all: compile move load pin
 
+install:
+	sudo apt update
+	sudo apt install -y bpfcc-tools python3-dnslib python3-dnspython gcc make linux-headers-$(shell uname -r) 
+
+
 compile:
 	mkdir -p ${OBJ_DIR}
 	mkdir -p ${BIN_DIR}

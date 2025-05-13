@@ -4,3 +4,5 @@ obj/
 *.o
 *.a
 *.exe
+.DS_Store
+.idea/
