@@ -8,7 +8,7 @@ def manage_ip(ip_address, prog_type):
     PROG_PATH = "./bin/manage"
     PROG_FILE = os.path.join(os.getcwd(), PROG_PATH)
     args = ["sudo", PROG_FILE, prog_type, ip_address]
-    if (prog_type == "add") :
+    if prog_type == "add":
         args.append("1")
     return subprocess.run(args, capture_output=True, text=True).stdout.rstrip()
 

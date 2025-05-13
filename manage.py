@@ -11,28 +11,36 @@ def get_map_fd():
         sys.exit(1)
     return map_fd
 
+
 def bpf_obj_get(path):
-    return libbcc.lib.bpf_obj_get(bytes(path, 'utf-8'))
+    return libbcc.lib.bpf_obj_get(bytes(path, "utf-8"))
+
 
 def ip_to_u32(ip_str):
-    return ctypes.c_uint32(int.from_bytes(inet_pton(AF_INET, ip_str), byteorder='little'))
+    return ctypes.c_uint32(
+        int.from_bytes(inet_pton(AF_INET, ip_str), byteorder="little")
+    )
+
 
 # def show_map(map_fd):
 #     # Example, real code needs bpf syscall wrappers
 #     print("Showing map entries...")
 
-def add_entry(map_fd, ip_str, value = 1):
+
+def add_entry(map_fd, ip_str, value=1):
     key = ip_to_u32(ip_str)
     val = ctypes.c_uint64(value)
     res = libbcc.lib.bpf_update_elem(map_fd, ctypes.byref(key), ctypes.byref(val), 0)
     if res != 0:
         print("Failed to add entry")
 
+
 def delete_entry(map_fd, ip_str):
     key = ip_to_u32(ip_str)
     res = libbcc.lib.bpf_delete_elem(map_fd, ctypes.byref(key))
     if res != 0:
         print("Failed to delete entry")
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
