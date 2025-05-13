@@ -55,10 +55,7 @@ def collect_domains():
         print(f"Processing {idx}/{len(files)-1}", end="\r", flush=True)
         text = download_file(f["download_url"])
         for line in text.splitlines():
-            # print(f"Processing {idx}/{len(files)-1}    {len(domains)}", end="\r", flush=True)
             m1 = domain_re1.match(line)
-            if len(domains) >= MAX_LINES:
-                break
             if m1:
                 domains.add(m1.group(1))
                 continue
@@ -66,9 +63,8 @@ def collect_domains():
             if m2:
                 domains.add(m2.group(1))
 
-            
-        if len(domains) >= MAX_LINES:
-            break
+            if len(domains) >= MAX_LINES:
+                break
 
     out_path = "all_domains.txt"
     with open(out_path, "w", encoding="utf-8") as out:
