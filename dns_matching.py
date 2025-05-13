@@ -217,7 +217,7 @@ try:
 
     # create raw socket, bind it to user provided interface
     # attach bpf program to socket created
-    BPF.attach_raw_socket(function_dns_matching, "enp0s1")
+    BPF.attach_raw_socket(function_dns_matching, "")
 
     # Get the table.
     cache = bpf.get_table("cache")

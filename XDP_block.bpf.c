@@ -10,7 +10,7 @@ struct
     __uint(type, BPF_MAP_TYPE_HASH);
     __type(key, __u32); // IPv4 address
     __type(value, __u64);
-    __uint(max_entries, 1024);
+    __uint(max_entries, 4096);
 } ip_map SEC(".maps");
 
 SEC("xdp")
